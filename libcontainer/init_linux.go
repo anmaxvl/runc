@@ -33,6 +33,7 @@ type initType string
 const (
 	initSetns    initType = "setns"
 	initStandard initType = "standard"
+	maxEINTRRetryCount int = 100
 )
 
 type pid struct {

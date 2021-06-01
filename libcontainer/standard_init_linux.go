@@ -226,8 +226,14 @@ func (l *linuxStandardInit) Init() error {
 		return err
 	}
 
-	if err := unix.Exec(name, l.config.Args[0:], os.Environ()); err != nil {
-		return newSystemErrorWithCause(err, "exec user process")
+	for i := 0; i < 100; i++ {
+		if err := unix.Exec(name, l.config.Args[0:], os.Environ()); err != nil {
+			if err != unix.EINTR {
+				return newSystemErrorWithCause(err, "exec user process")
+			}
+			continue
+		}
+		return nil
 	}
-	return nil
+	return errors.New("maximum number of retries exceeded")
 }

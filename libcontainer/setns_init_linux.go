@@ -96,5 +96,14 @@ func (l *linuxSetnsInit) Init() error {
 		return newSystemErrorWithCause(err, "closing log pipe fd")
 	}
 
-	return system.Execv(l.config.Args[0], l.config.Args[0:], os.Environ())
+	for i := 0; i < 100; i++ {
+		if err := system.Execv(l.config.Args[0], l.config.Args[0:], os.Environ()); err != nil {
+			if err != unix.EINTR {
+				return err
+			}
+			continue
+		}
+		return nil
+	}
+	return errors.New("setns_init: execv maximum number of retries exceeded")
 }
