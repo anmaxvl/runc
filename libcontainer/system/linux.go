@@ -3,6 +3,8 @@
 package system
 
 import (
+	"fmt"
+	"os"
 	"os/exec"
 	"unsafe"
 
@@ -41,6 +43,9 @@ func Execv(cmd string, args []string, env []string) error {
 func Exec(cmd string, args []string, env []string) error {
 	for {
 		err := unix.Exec(cmd, args, env)
+		if err != nil {
+			fmt.Fprintf(os.Stdout, "system.Exec error: %s\n", err)
+		}
 		if err != unix.EINTR { //nolint:errorlint // unix errors are bare
 			return err
 		}
